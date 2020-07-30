@@ -5,4 +5,12 @@
         <TargetFramework>netcoreapp3.1</TargetFramework>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Folder Include="Framework" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\AZEsportsDiscordBot.Framework\AZEsportsDiscordBot.Framework.csproj" />
+    </ItemGroup>
+
 </Project>
