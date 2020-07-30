@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AZEsportsDiscordBot", "AZEsportsDiscordBot\AZEsportsDiscordBot.csproj", "{7C2DB972-E0C2-4F31-8616-7468B6D8CEB7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AZEsportsDiscordBot.Framework", "AZEsportsDiscordBot.Framework\AZEsportsDiscordBot.Framework.csproj", "{F4BD6991-4222-4DFC-B2F6-A64462274783}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{7C2DB972-E0C2-4F31-8616-7468B6D8CEB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C2DB972-E0C2-4F31-8616-7468B6D8CEB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C2DB972-E0C2-4F31-8616-7468B6D8CEB7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4BD6991-4222-4DFC-B2F6-A64462274783}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4BD6991-4222-4DFC-B2F6-A64462274783}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4BD6991-4222-4DFC-B2F6-A64462274783}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4BD6991-4222-4DFC-B2F6-A64462274783}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
