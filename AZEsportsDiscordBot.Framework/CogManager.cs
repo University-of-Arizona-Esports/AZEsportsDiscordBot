@@ -19,6 +19,11 @@ namespace AZEsportsDiscordBot.Framework
         public readonly DiscordSocketClient Discord;
 
         /// <summary>
+        /// Service provider given to this manager, used by some cogs.
+        /// </summary>
+        public readonly IServiceProvider Services;
+
+        /// <summary>
         /// Folder relative to current working directory to look in for cogs, or
         /// null to use the current working directory. Default value: "cogs" folder.
         /// </summary>
@@ -35,9 +40,11 @@ namespace AZEsportsDiscordBot.Framework
         /// Create a CogManager for a discord client.
         /// </summary>
         /// <param name="discord">Client that the cogs will have access to.</param>
-        public CogManager(DiscordSocketClient discord)
+        /// <param name="services">Service provider that cogs can use.</param>
+        public CogManager(DiscordSocketClient discord, IServiceProvider services)
         {
             Discord = discord;
+            Services = services;
             _assemblies = new Dictionary<string, LoadedAssembly>();
             _unloaded = new Dictionary<string, WeakReference<LoadedAssembly>>();
         }

@@ -1,3 +1,4 @@
+using System;
 using Discord.WebSocket;
 
 namespace AZEsportsDiscordBot.Framework
@@ -17,6 +18,11 @@ namespace AZEsportsDiscordBot.Framework
         /// Convenient access to the discord client instance.
         /// </summary>
         protected DiscordSocketClient Discord => CogManager.Discord;
+
+        /// <summary>
+        /// Convenient access to the manager's service provider.
+        /// </summary>
+        protected IServiceProvider Services => CogManager.Services;
 
         /// <summary>
         /// Called when this Cog is loaded by a <see cref="CogManager"/>.
