@@ -24,6 +24,11 @@ namespace AZEsportsDiscordBot.Framework
         public readonly IServiceProvider Services;
 
         /// <summary>
+        /// Global logger for the cogs.
+        /// </summary>
+        public readonly IAzBotLogger Logger;
+
+        /// <summary>
         /// Folder relative to current working directory to look in for cogs, or
         /// null to use the current working directory. Default value: "cogs" folder.
         /// </summary>
@@ -41,10 +46,11 @@ namespace AZEsportsDiscordBot.Framework
         /// </summary>
         /// <param name="discord">Client that the cogs will have access to.</param>
         /// <param name="services">Service provider that cogs can use.</param>
-        public CogManager(DiscordSocketClient discord, IServiceProvider services)
+        public CogManager(DiscordSocketClient discord, IServiceProvider services, IAzBotLogger logger)
         {
             Discord = discord;
             Services = services;
+            Logger = logger;
             _assemblies = new Dictionary<string, LoadedAssembly>();
             _unloaded = new Dictionary<string, WeakReference<LoadedAssembly>>();
         }
