@@ -41,6 +41,7 @@ namespace AZEsportsDiscordBot
 
         public Task Unload()
         {
+            // Assemblies are collected to list to avoid concurrent modification
             foreach (var assembly in Value.LoadedAssemblies.ToList())
             {
                 Value.UnloadAssembly(assembly);
