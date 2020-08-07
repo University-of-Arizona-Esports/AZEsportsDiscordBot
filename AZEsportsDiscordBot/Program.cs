@@ -40,11 +40,11 @@ namespace AZEsportsDiscordBot
             
             // Start up the core components
             _logger = await LoadComponent<LogManager, IAzBotLogger>();
-            // TODO load database component
+            // TODO await LoadComponent<DatabaseManager>();
             await LoadComponent<DiscordLoader, DiscordSocketClient>();
-            // TODO load web socket component
             await LoadComponent<CogManagerLoader, CogManager>();
-            await _logger.Log("Core components loaded.");
+            // TODO await LoadComponent<WebSocket>();
+            await Log("Core components loaded.");
 
             // TODO load some cogs?
 
@@ -78,26 +78,31 @@ namespace AZEsportsDiscordBot
         }
 
         /// <summary>
-        /// Load a single core component. The component is added to the list of
-        /// core components and registered with the service collection.
+        /// Loads a core component.
+        /// This method is called by one of the LoadComponent methods.
+        /// The component is added to the list of core components and registered
+        /// with the service collection.
         /// </summary>
+        /// <param name="converter">Func which converts the loader into the loaded value.</param>
         /// <typeparam name="TLoader">Type which loads the component.</typeparam>
-        /// <typeparam name="TLoad">Type that is loaded by the <see cref="TLoader"/></typeparam>
+        /// <typeparam name="TLoad">Type that is loaded by the <see cref="TLoader"/>.</typeparam>
         /// <returns>Task that returns the loaded component.</returns>
         /// <remarks>If the loader throws an exception while loading a core component,
         /// it is fatal and the program will initiate a shutdown.</remarks>
-        private async Task<TLoad> LoadComponent<TLoader, TLoad>()
-            where TLoader : ILoadable<TLoad>, new()
+        private async Task<TLoad> LoadComponentInternal<TLoader, TLoad>(Func<TLoader, TLoad> converter)
+            where TLoader : ILoadable, new()
             where TLoad : class
         {
+            await Log($"Loading core component: {typeof(TLoad).Name}");
             try
             {
                 // Construct loader and load component
                 var component = new TLoader();
                 await component.Load(_services);
                 _internalComponents.Add(component);
-                _services.AddSingleton(typeof(TLoad), component.Value);
-                return component.Value;
+                var value = converter(component);
+                _services.AddSingleton(typeof(TLoad), value);
+                return value;
             }
             catch (Exception e)
             {
@@ -111,6 +116,32 @@ namespace AZEsportsDiscordBot
                 await FullShutdown();
             }
             return null;
+        }
+
+        /// <summary>
+        /// Load a core component. The component is added to the list of
+        /// core components and registered with the service collection.
+        /// </summary>
+        /// <typeparam name="TLoader">Type which loads the component.</typeparam>
+        /// <typeparam name="TLoad">Type that is loaded by the <see cref="TLoader"/></typeparam>
+        /// <returns>Task that returns the loaded component.</returns>
+        private Task<TLoad> LoadComponent<TLoader, TLoad>()
+            where TLoader : ILoadable<TLoad>, new()
+            where TLoad : class
+        {
+            return LoadComponentInternal<TLoader, TLoad>(loader => loader.Value);
+        }
+
+        /// <summary>
+        /// Load a core component. The component is added to the list of
+        /// core components and registered with the service collection.
+        /// </summary>
+        /// <typeparam name="TLoad">Type to load.</typeparam>
+        /// <returns>Task that returns the loaded component.</returns>
+        private Task<TLoad> LoadComponent<TLoad>()
+            where TLoad : class, ILoadable, new()
+        {
+            return LoadComponentInternal<TLoad, TLoad>(loader => loader);
         }
 
         /// <summary>
