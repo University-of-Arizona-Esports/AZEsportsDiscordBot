@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -35,11 +36,11 @@ namespace AZEsportsDiscordBot.Framework
         public string RelativeFolder = "cogs";
 
         /// <summary>Currently loaded assemblies.</summary>
-        private Dictionary<string, LoadedAssembly> _assemblies;
+        private ConcurrentDictionary<string, LoadedAssembly> _assemblies;
 
         /// <summary>Unloaded assemblies that have not been garbage collected.</summary>
         /// <seealso cref="CleanupUnloaded"/>
-        private Dictionary<string, WeakReference<LoadedAssembly>> _unloaded;
+        private ConcurrentDictionary<string, WeakReference<LoadedAssembly>> _unloaded;
 
         /// <summary>
         /// Create a CogManager for a discord client.
@@ -51,8 +52,8 @@ namespace AZEsportsDiscordBot.Framework
             Discord = discord;
             Services = services;
             Logger = logger;
-            _assemblies = new Dictionary<string, LoadedAssembly>();
-            _unloaded = new Dictionary<string, WeakReference<LoadedAssembly>>();
+            _assemblies = new ConcurrentDictionary<string, LoadedAssembly>();
+            _unloaded = new ConcurrentDictionary<string, WeakReference<LoadedAssembly>>();
         }
 
         /// <summary>
@@ -102,7 +103,7 @@ namespace AZEsportsDiscordBot.Framework
             var collected = _unloaded.Keys.Where(key => !_unloaded[key].TryGetTarget(out _)).ToList();
             foreach (var key in collected)
             {
-                _unloaded.Remove(key);
+                _unloaded.TryRemove(key, out _);
             }
         }
 
@@ -160,8 +161,7 @@ namespace AZEsportsDiscordBot.Framework
         /// <returns><see cref="CogUnloadState"/> with info on whether the cog was unloaded.</returns>
         public CogUnloadState UnloadAssembly(string name)
         {
-            if (!_assemblies.TryGetValue(name, out var loader)) return CogUnloadState.NotLoaded;
-            _assemblies.Remove(name);
+            if (!_assemblies.TryRemove(name, out var loader)) return CogUnloadState.NotLoaded;
             loader.UnloadCogs(this);
             // Unload the assembly context itself
             loader.Unload();
