@@ -119,6 +119,7 @@ namespace AZEsportsDiscordBot.Framework
             if (!IsLoaded) return;
             foreach (var cog in _loadedCogs)
             {
+                cog.Unloading = true;
                 UnsafeAction(manager, cog.GetType().Name, () => cog.OnCogPreUnload());
                 Task.Run(async () =>
                 {
