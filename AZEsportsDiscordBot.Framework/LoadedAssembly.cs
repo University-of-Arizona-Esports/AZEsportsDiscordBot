@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.Loader;
+using System.Threading.Tasks;
 using Discord;
 
 namespace AZEsportsDiscordBot.Framework
@@ -93,6 +94,22 @@ namespace AZEsportsDiscordBot.Framework
             }
         }
 
+        private void UnsafeAction(CogManager manager, string source, Action action)
+        {
+            try
+            {
+                action();
+            }
+            catch (Exception e)
+            {
+                var log = new LogMessage(LogSeverity.Warning,
+                    nameof(CogManager),
+                    $"Exception occured while unloading Cog ({source})",
+                    e);
+                manager.HandleLog(log);
+            }
+        }
+
         /// <summary>
         /// Unload cogs in the assembly.
         /// </summary>
@@ -102,16 +119,13 @@ namespace AZEsportsDiscordBot.Framework
             if (!IsLoaded) return;
             foreach (var cog in _loadedCogs)
             {
-                try
+                UnsafeAction(manager, cog.GetType().Name, () => cog.OnCogPreUnload());
+                Task.Run(async () =>
                 {
-                    cog.OnCogUnload();
+                    await cog.AllTasksComplete();
+                    UnsafeAction(manager, cog.GetType().Name, () => cog.OnCogUnload());
                     cog.CogManager = null;
-                }
-                catch (Exception e)
-                {
-                    var log = new LogMessage(LogSeverity.Warning, nameof(CogManager), $"Exception occured while unloading Cog ({cog.GetType().Name})", e);
-                    manager.HandleLog(log);
-                }
+                });
             }
             // Remove references to assembly types.
             _loadedCogs.Clear();

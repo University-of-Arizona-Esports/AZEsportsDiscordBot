@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AZEsportsDiscordBot.Framework;
+using AZEsportsDiscordBot.Intrinsic.Commands;
 using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -42,7 +44,9 @@ namespace AZEsportsDiscordBot
             _logger = await LoadComponent<LogManager, IAzBotLogger>();
             // TODO await LoadComponent<DatabaseManager>();
             await LoadComponent<DiscordLoader, DiscordSocketClient>();
+            await LoadComponent<CommandServiceLoader, CommandService>();
             await LoadComponent<CogManagerLoader, CogManager>();
+            await LoadComponent<CommandHandler>();
             // TODO await LoadComponent<WebSocket>();
             await Log("Core components loaded.");
 
