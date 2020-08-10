@@ -18,7 +18,9 @@ public class ExampleCog : Cog
     // When the cog is unloaded, it must do its best to cleanup all traces of itself.
     // If an outside thread has a method from this cog's assembly on the stack, it will
     // prevent the assembly from being unloaded.
-    public override void OnCogUnload()
+    // The pre-unload method is used to stop this cog from receiving any more work
+    // The OnCogUnload method is for fully shutting down the cog
+    public override void OnCogPreUnload()
     {
         Discord.UserJoined -= HandleUserJoin;
     }
@@ -26,7 +28,12 @@ public class ExampleCog : Cog
     // Send a join message to the default channel
     private async Task HandleUserJoin(SocketGuildUser user)
     {
-        await user.Guild.DefaultChannel.SendMessageAsync($"{user.Mention} joined the server.");
+        // For methods that are called externally, the content should be placed
+        // in a TaskWrapper so that the cog is not fully unloaded while it's doing work.
+        await TaskWrapper(async () =>
+        {
+            await user.Guild.DefaultChannel.SendMessageAsync($"{user.Mention} joined the server.");
+        });
     }
 }
 ```

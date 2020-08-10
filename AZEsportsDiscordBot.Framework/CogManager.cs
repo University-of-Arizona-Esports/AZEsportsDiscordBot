@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -24,29 +25,35 @@ namespace AZEsportsDiscordBot.Framework
         public readonly IServiceProvider Services;
 
         /// <summary>
+        /// Global logger for the cogs.
+        /// </summary>
+        public readonly IAzBotLogger Logger;
+
+        /// <summary>
         /// Folder relative to current working directory to look in for cogs, or
         /// null to use the current working directory. Default value: "cogs" folder.
         /// </summary>
         public string RelativeFolder = "cogs";
 
         /// <summary>Currently loaded assemblies.</summary>
-        private Dictionary<string, LoadedAssembly> _assemblies;
+        private ConcurrentDictionary<string, LoadedAssembly> _assemblies;
 
         /// <summary>Unloaded assemblies that have not been garbage collected.</summary>
         /// <seealso cref="CleanupUnloaded"/>
-        private Dictionary<string, WeakReference<LoadedAssembly>> _unloaded;
+        private ConcurrentDictionary<string, WeakReference<LoadedAssembly>> _unloaded;
 
         /// <summary>
         /// Create a CogManager for a discord client.
         /// </summary>
         /// <param name="discord">Client that the cogs will have access to.</param>
         /// <param name="services">Service provider that cogs can use.</param>
-        public CogManager(DiscordSocketClient discord, IServiceProvider services)
+        public CogManager(DiscordSocketClient discord, IServiceProvider services, IAzBotLogger logger)
         {
             Discord = discord;
             Services = services;
-            _assemblies = new Dictionary<string, LoadedAssembly>();
-            _unloaded = new Dictionary<string, WeakReference<LoadedAssembly>>();
+            Logger = logger;
+            _assemblies = new ConcurrentDictionary<string, LoadedAssembly>();
+            _unloaded = new ConcurrentDictionary<string, WeakReference<LoadedAssembly>>();
         }
 
         /// <summary>
@@ -96,7 +103,7 @@ namespace AZEsportsDiscordBot.Framework
             var collected = _unloaded.Keys.Where(key => !_unloaded[key].TryGetTarget(out _)).ToList();
             foreach (var key in collected)
             {
-                _unloaded.Remove(key);
+                _unloaded.TryRemove(key, out _);
             }
         }
 
@@ -154,8 +161,7 @@ namespace AZEsportsDiscordBot.Framework
         /// <returns><see cref="CogUnloadState"/> with info on whether the cog was unloaded.</returns>
         public CogUnloadState UnloadAssembly(string name)
         {
-            if (!_assemblies.TryGetValue(name, out var loader)) return CogUnloadState.NotLoaded;
-            _assemblies.Remove(name);
+            if (!_assemblies.TryRemove(name, out var loader)) return CogUnloadState.NotLoaded;
             loader.UnloadCogs(this);
             // Unload the assembly context itself
             loader.Unload();

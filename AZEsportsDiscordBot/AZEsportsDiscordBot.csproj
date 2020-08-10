@@ -9,4 +9,9 @@
       <ProjectReference Include="..\AZEsportsDiscordBot.Framework\AZEsportsDiscordBot.Framework.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="System.Data.SqlClient" Version="4.8.1" />
+      <PackageReference Include="websocketsharp.core" Version="1.0.0" />
+    </ItemGroup>
+
 </Project>
